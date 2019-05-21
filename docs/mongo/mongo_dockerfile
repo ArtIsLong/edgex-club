@@ -1,0 +1,17 @@
+FROM mongo:3.4.10
+
+ENV APP_DIR=/mongo
+ENV DB_DIR=db
+ENV APP_PORT=27017
+
+WORKDIR $APP_DIR/
+
+RUN mkdir -p $APP_DIR/$DB_DIR
+
+COPY *.js ./
+COPY *.sh ./
+RUN chmod 777 /mongo/start.sh
+
+EXPOSE $APP_PORT
+
+ENTRYPOINT /mongo/start.sh
