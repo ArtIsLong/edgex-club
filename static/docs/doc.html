@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>EdgeX官方文档</title>
     <link rel="shortcut icon" type="image/x-icon" href="/img/bg_img.png" style="width:62px;height:62px;" />
-    <link rel="stylesheet" href="/vendors/bootstrap-4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/bootstrap/css/bootstrap.min.css">
     <link href="/vendors/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/footer.css">
@@ -14,9 +14,19 @@
         -moz-box-sizing: border-box;
         box-sizing: border-box;
       }
-      a {
+      div.header  a {
         color: inherit;
         text-decoration: none!important;
+      }
+
+      div.docs_trans ul {
+        font-weight: blod;
+        font-size: medium;
+      }
+      div.docs_trans ul.level_2 li {
+        text-indent:2%;
+        font-weight: blod;
+        font-size: medium;
       }
     </style>
   </head>
@@ -30,9 +40,7 @@
         <div class="title" style="display:inline-block;">
           <a href="/docs/doc.html" target="_blank"><i class="fa fa-hom fa-fw"></i>官方文档</a>
         </div>
-        <div class="title" style="display:inline-block;">
-          <a href="/market/market.html" target="_blank"><i class="fa fa-hom fa-fw"></i>Marketplace</a>
-        </div>
+
         <div style="display:inline-block;" class="pull-right">
           <div class="header_post">
             <a><span><i class="fa fa-edit fa-fw"></i>发帖</span></a>
@@ -51,6 +59,31 @@
 
     </div>
     <!--导航栏 section end----------------------->
+
+    <div class="docs_trans" style="margin-top:60px;">
+      <div class="container">
+        <ul class="level_1">
+          <li><a href="#">1. 快速开始</a></li>
+          <li>
+            <ul class="level_2">
+              <li><a href="#">1.1 准备</a></li>
+              <li><a href="#">1.2 连接一个设备</a></li>
+              <li><a href="#">1.3 连接一个应用</a></li>
+              <li><a href="#">1.4 控制设备</a></li>
+              <li><a href="#">1.5 下一步</a></li>
+            </ul>
+          </li>
+
+          <li><a href="#">2. 简介</a></li>
+          <li>
+            <ul class="level_2">
+              <li><a href="#"></a></li>
+            </ul>
+          </li>
+        </ul>
+
+      </div>
+    </div>
 
     <script type="text/javascript" src="/vendors/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="/vendors/bootstrap-4/js/bootstrap.min.js"></script>
