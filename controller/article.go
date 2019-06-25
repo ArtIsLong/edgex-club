@@ -6,7 +6,6 @@ import (
 	reposi "edgex-club/repository"
 	"encoding/json"
 	_ "fmt"
-	mux "github.com/gorilla/mux"
 	"html/template"
 	_ "io/ioutil"
 	"log"
@@ -14,6 +13,8 @@ import (
 	_ "os"
 	"strconv"
 	"strings"
+
+	mux "github.com/gorilla/mux"
 )
 
 type TodoPageData struct {
@@ -346,6 +347,23 @@ func LoadEditArticleTemplate(w http.ResponseWriter, r *http.Request) {
 
 	t, _ := template.ParseFiles("static/articles/edit_article.html")
 	t.Execute(w, data)
+}
+
+func HotAuthor(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	log.Println("hot author")
+	hotAuthor := reposi.ArticleRepos.HotAuthor()
+	result, _ := json.Marshal(&hotAuthor)
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.Write(result)
+}
+
+func HotArticle(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	hotArticle := reposi.ArticleRepos.HotArticle()
+	result, _ := json.Marshal(&hotArticle)
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.Write(result)
 }
 
 func saveToFile(body string, userName string, articleID string) {

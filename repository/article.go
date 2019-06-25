@@ -2,9 +2,11 @@ package repository
 
 import (
 	"edgex-club/model"
-	"gopkg.in/mgo.v2/bson"
+	"encoding/json"
 	"log"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 type ArticleRepositoty struct {
@@ -217,4 +219,61 @@ func (as *ArticleRepositoty) UserArticleCount(userName string) int {
 	count, _ := coll.Find(bson.M{"userName": userName, "approved": true}).Count()
 
 	return count
+}
+
+func (as *ArticleRepositoty) HotAuthor() (users []model.User) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	// db.article.aggregate([
+	// 	{ $group: {
+	// 		   _id: "$userName",
+	// 		   amt: { $sum: 1 }
+	// 	  }
+	// 	},
+	// 	{ $limit : 5 },
+	// 	{ $sort : { amt : -1} },
+	// 	{ $lookup: {from: "user",localField: "_id",foreignField: "name",as:"userList"}}
+	//    ])
+	result := make([]map[string]interface{}, 0)
+
+	o1 := bson.M{"$group": bson.M{"_id": "$userName", "amt": bson.M{"$sum": 1}}}
+	o2 := bson.M{"$limit": 5}
+	o3 := bson.M{"$sort": bson.M{"amt": -1}}
+	o4 := bson.M{"$lookup": bson.M{"from": "user", "localField": "_id", "foreignField": "name", "as": "userList"}}
+	operations := []bson.M{o1, o2, o3, o4}
+
+	coll := ds.S.DB("edgex-club").C("article")
+
+	pipe := coll.Pipe(operations)
+	err := pipe.AllowDiskUse().All(&result)
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+	log.Println(len(result))
+	users = make([]model.User, 0)
+	for _, v := range result {
+		u := make([]model.User, 0)
+		byteArr, err := json.Marshal(v["userList"])
+		if err != nil {
+			log.Println(err.Error())
+			return users
+		}
+		err = json.Unmarshal(byteArr, &u)
+		if err != nil {
+			log.Println(err.Error())
+			return users
+		}
+		users = append(users, u[0])
+	}
+
+	return users
+}
+
+func (as *ArticleRepositoty) HotArticle() (articles []model.Article) {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB("edgex-club").C("article")
+	coll.Find(nil).Sort("-readCount").Limit(5).All(&articles)
+	return articles
 }

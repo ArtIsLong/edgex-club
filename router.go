@@ -2,8 +2,9 @@ package main
 
 import (
 	controller "edgex-club/controller"
-	mux "github.com/gorilla/mux"
 	"net/http"
+
+	mux "github.com/gorilla/mux"
 )
 
 func initRouter() http.Handler {
@@ -42,6 +43,9 @@ func initRouter() http.Handler {
 	//首页加载最新最热门的文章
 	s.HandleFunc("/findNewArticles", controller.FindNewArticles).Methods("GET")
 
+	s.HandleFunc("/hotAuthor", controller.HotAuthor).Methods("GET")
+	s.HandleFunc("/hotArticle", controller.HotArticle).Methods("GET")
+
 	s1 := r.PathPrefix("").Subrouter()
 	//阅读某个用户的文章
 	s1.HandleFunc("/articles/users/{userName}/{articleId}", controller.FindOneArticle).Methods("GET")
@@ -50,6 +54,7 @@ func initRouter() http.Handler {
 	s1.HandleFunc("/users/{userName}", controller.UserHome).Methods("GET")
 	//加载编辑、发帖模板【这个地方需要用户登录认证后才能操作，但是在URL中不能显示/api/v1的路径，因此在此处单独处理】
 	s1.HandleFunc("/article/edit/{userName}/{articleId}", controller.LoadEditArticleTemplate).Methods("GET")
+
 	return r
 }
 
