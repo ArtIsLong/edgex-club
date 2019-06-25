@@ -274,6 +274,6 @@ func (as *ArticleRepositoty) HotArticle() (articles []model.Article) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB("edgex-club").C("article")
-	coll.Find(nil).Sort("-readCount").Limit(10).All(&articles)
+	coll.Find(bson.M{"approved": true}).Sort("-readCount").Limit(10).All(&articles)
 	return articles
 }
