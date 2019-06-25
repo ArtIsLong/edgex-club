@@ -72,6 +72,14 @@
       bottom: 0;
     }
 
+    .x-hot-article li{
+      
+      padding: 3px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  
   </style>
 </head>
 
@@ -143,12 +151,30 @@
           </div>
         </div>
         <div class="col-sm-4 col-md-4 col-lg-4">
-          <div class="announcement">
-            <p style="border-bottom:1px solid #d3bdd0;font-size:medium;"><i class="fa fa-volume-up fa-fw" style="color:#942c49;"></i>&nbsp;网站公告</p>
-            <p style="color:rgb(148,44,73);"> EdgeX Foundry中国社区，是国内首个EdgeX Foundry物联网框架的交流社区。EdgeX Foundry是由Dell发起的物联网解决方案，目前EdgeX Foundry属于Linux基金会的首个物联网框架。我们致力于为EdgeX Foundry技术人员提供分享和交流的平台，推动EdgeX Foundry在国内的普及和应用。 欢迎CTO、架构师、开发者等，在这里学习与交流使用EdgeX Foundry的实战经验。
-            </p>
-
+            <div class="panel panel-default">
+                <div class="panel-heading"> <i class="fa fa-volume-up fa-fw" style="color:#942c49;"></i>&nbsp;网站公告</div>
+                <div class="panel-body">
+                    <div class="announcement">
+                       
+                        <p style="color:rgb(148,44,73);"> EdgeX Foundry中国社区，是国内首个EdgeX Foundry物联网框架的交流社区。EdgeX Foundry是由Dell发起的物联网解决方案，目前EdgeX Foundry属于Linux基金会的首个物联网框架。我们致力于为EdgeX Foundry技术人员提供分享和交流的平台，推动EdgeX Foundry在国内的普及和应用。 欢迎CTO、架构师、开发者等，在这里学习与交流使用EdgeX Foundry的实战经验。
+                        </p>
+            
+                      </div>
+                </div>
+            </div>
+          
+          <div class="panel panel-default x-hot-article">
+            <div class="panel-heading">热门文章</div>
+            <div class="panel-body">
+                
+            </div>
+        </div>
+        <div class="panel panel-default x-hot-author">
+          <div class="panel-heading">热门作者</div>
+          <div class="panel-body">
+              
           </div>
+        </div>
           <div class="wechat_comm">
             <img src="" alt="">
           </div>
@@ -173,6 +199,46 @@
   <script type="text/javascript" src="/js/util.js"></script>
   <script type="text/javascript" src="/js/main.js"></script>
   <script type="text/javascript">
+
+    function loadHotAuthor(){
+      $.ajax({
+        url:'/api/v1/hotAuthor',
+        type:'GET',
+        success:function(data){
+          $("div.x-hot-author .panel-body").empty();
+          var rowData = '<ul class="list-inline">';
+          $.each(data,function(i,e){
+              var path = '<a href="/users/'+e.name+'" target="_blank"><img class="media-object img-circle" style="width:51px;height:51px;border: 1px solid rgba(148, 44, 73, 0.5);outline:0;" src="'+e.avatarUrl+'" alt=""></a>';
+              rowData += '<li>'+path+'</li>';  
+          });
+          rowData+='</ul>';
+          $("div.x-hot-author .panel-body").append(rowData)
+        },
+        error:function(){
+
+        }
+      });
+    }
+
+    function loadHotArticle(){
+      $.ajax({
+        url:'/api/v1/hotArticle',
+        type:'GET',
+        success:function(data){
+          $("div.x-hot-article .panel-body").empty();
+          var rowData = '<ul class="list-unstyled">';
+          $.each(data,function(i,e){
+                var path = "/articles/users/" + e.userName + "/" + e.id;
+                rowData += '<li><a href="'+path+'" class="" target="_blank"><u>'+e.title+'</u></a></li>';  
+          });
+          rowData+='</ul>';
+          $("div.x-hot-article .panel-body").append(rowData)
+        },
+        error:function(){
+
+        }
+      });
+    }
 
      function loadNewArticleList(){
       $.ajax({
@@ -250,7 +316,8 @@
 
     $(document).ready(function(){
       loadNewArticleList();
-
+      loadHotAuthor();
+      loadHotArticle();
     });
   </script>
 </body>

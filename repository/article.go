@@ -237,7 +237,7 @@ func (as *ArticleRepositoty) HotAuthor() (users []model.User) {
 	result := make([]map[string]interface{}, 0)
 
 	o1 := bson.M{"$group": bson.M{"_id": "$userName", "amt": bson.M{"$sum": 1}}}
-	o2 := bson.M{"$limit": 5}
+	o2 := bson.M{"$limit": 10}
 	o3 := bson.M{"$sort": bson.M{"amt": -1}}
 	o4 := bson.M{"$lookup": bson.M{"from": "user", "localField": "_id", "foreignField": "name", "as": "userList"}}
 	operations := []bson.M{o1, o2, o3, o4}
@@ -274,6 +274,6 @@ func (as *ArticleRepositoty) HotArticle() (articles []model.Article) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB("edgex-club").C("article")
-	coll.Find(nil).Sort("-readCount").Limit(5).All(&articles)
+	coll.Find(nil).Sort("-readCount").Limit(10).All(&articles)
 	return articles
 }

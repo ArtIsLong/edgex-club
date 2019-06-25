@@ -77,6 +77,14 @@
         span.article_operation_edit {
             cursor: default!important;
         }
+
+        .x-hot-article li{
+      
+            padding: 3px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 
@@ -128,10 +136,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading x-title">热门文章</div>
+                <div class="panel panel-default x-hot-article">
+                    <div class="panel-heading">热门文章</div>
                     <div class="panel-body">
-
+                        
                     </div>
                 </div>
             </div>
@@ -177,6 +185,26 @@
         var userId = {{.UserId}}
         var userName = {{.UserName}}
 
+        function loadHotArticle(){
+            $.ajax({
+                url:'/api/v1/hotArticle',
+                type:'GET',
+                success:function(data){
+                $("div.x-hot-article .panel-body").empty();
+                var rowData = '<ul class="list-unstyled">';
+                $.each(data,function(i,e){
+                        var path = "/articles/users/" + e.userName + "/" + e.id;
+                        rowData += '<li><a href="'+path+'" class="" target="_blank"><u>'+e.title+'</u></a></li>';  
+                });
+                rowData+='</ul>';
+                $("div.x-hot-article .panel-body").append(rowData)
+                },
+                error:function(){
+
+                }
+            });
+        }
+
         function updateMessage(event) {
             var msgId = $(event.currentTarget).attr("msgId");
             $.ajax({
@@ -203,6 +231,7 @@
         }
 
         $(document).ready(function() {
+            loadHotArticle();
             if (!edgexClubMainModule.loginIsVaild) {
                 $("#message").hide();
             }
