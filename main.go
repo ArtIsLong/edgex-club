@@ -49,11 +49,12 @@ func main() {
 				WriteTimeout: 15 * time.Second,
 				ReadTimeout:  15 * time.Second,
 			}
-			log.Println("Server Listen On Port: 443")
+			log.Println("TLS Server Listen On Port: 443")
 			log.Fatal(server.ListenAndServeTLS("./env/edgex-club-nginx.crt", "./env/edgex-club-nginx.key"))
 		}()
 	}
 
+	log.Println("Server Listen On Port: 8080")
 	if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://localhost:443"+r.RequestURI, http.StatusMovedPermanently)
 	})); err != nil {
