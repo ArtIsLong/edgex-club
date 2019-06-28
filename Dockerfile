@@ -24,6 +24,7 @@ RUN echo "https://mirrors.ustc.edu.cn/alpine/v3.6/main" > /etc/apk/repositories
 RUN echo "https://mirrors.ustc.edu.cn/alpine/v3.6/community" >> /etc/apk/repositories
 RUN cat /etc/apk/repositories
 
+#解决无法掉转到github认证登陆界面，因为没有证书
 #RUN apk update && apk --no-cache add ca-certificates
 
 WORKDIR /edgex-club/
@@ -31,10 +32,11 @@ COPY --from=builder /go/src/edgex-club/edgex-club-linux .
 COPY --from=builder /go/src/edgex-club/env ./env/
 COPY --from=builder /go/src/edgex-club/static ./static/
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
-COPY ./env/edgex-club.crt /usr/local/share/ca-certificates/edgex-club.crt
-RUN update-ca-certificates
+#RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+#COPY ./env/edgex-club.crt /usr/local/share/ca-certificates/edgex-club.crt
+#RUN update-ca-certificates
 
+EXPOSE 443
 EXPOSE 8080
 
-ENTRYPOINT ["./edgex-club-linux", "-confpath=env/prod.yaml"]
+ENTRYPOINT ["./edgex-club-linux", "-confpath=env/prod.yaml","-prod=true"]
