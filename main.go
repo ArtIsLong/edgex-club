@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"edgex-club/config"
 	"edgex-club/repository"
 	"flag"
@@ -31,11 +32,18 @@ func main() {
 
 	//用户访问限制功能，定时清除3分钟内已经被锁定的用户，
 	//防止map缓存越过内存边界
-  go cleanupVisitors()
+	go cleanupVisitors()
 
+	cer, err := tls.LoadX509KeyPair("./env/edgex-club-nginx.crt", "./env/edgex-club-nginx.key")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cer}}
 	server := &http.Server{
 		Handler:      GeneralFilter(limit(r)),
-		Addr:         ":8080",
+		Addr:         ":443",
+		TLSConfig:    tlsConfig,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
