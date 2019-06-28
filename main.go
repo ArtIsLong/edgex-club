@@ -56,7 +56,7 @@ func main() {
 
 	log.Println("Server Listen On Port: 8080")
 	if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://localhost:443"+r.RequestURI, http.StatusMovedPermanently)
+		http.Redirect(w, r, "https://www.edgexfoundry.club"+r.RequestURI, http.StatusMovedPermanently)
 	})); err != nil {
 		log.Fatalf("ListenAndServe error: %v", err)
 	}
