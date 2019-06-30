@@ -5,7 +5,10 @@ $(document).ready(function(){
   		statusCode: {
   			302: function() {
   				window.location.href='/login.html?ran='+Math.random(); //prevent browser cache result to redirect  failed.
-  			}
+        },
+        429: function(){
+          alert("当前操作过于频繁，请稍后再试！");
+        }
   		}
   	});
   edgexClubMainModule.loginIsVaild = edgexClubMainModule.checkLogin();
