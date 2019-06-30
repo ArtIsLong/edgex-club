@@ -7,7 +7,6 @@ import (
 	"edgex-club/repository"
 	"edgex-club/util"
 	"encoding/json"
-	mux "github.com/gorilla/mux"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -15,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	_ "time"
+
+	mux "github.com/gorilla/mux"
 )
 
 type ReturnLoginUserToPageData struct {
@@ -130,7 +131,7 @@ func getGithubTokenByCode(code string) string {
 	url := "https://github.com/login/oauth/access_token"
 	param := make(map[string]string, 10)
 	param["client_id"] = "173d78b242d4fc35aca9"
-	param["client_secret"] = "f438bea3c8d4007fbe0d7c5aa255efe8af9dca7f"
+	param["client_secret"] = "a35c510a599f19c6041325bcb7b3579072eb9228"
 	param["code"] = code
 
 	bytesData, err := json.Marshal(param)
