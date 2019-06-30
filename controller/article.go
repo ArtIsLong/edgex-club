@@ -351,7 +351,7 @@ func LoadEditArticleTemplate(w http.ResponseWriter, r *http.Request) {
 
 func HotAuthor(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	log.Println("hot author")
+
 	hotAuthor := reposi.ArticleRepos.HotAuthor()
 	result, _ := json.Marshal(&hotAuthor)
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")

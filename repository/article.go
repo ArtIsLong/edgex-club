@@ -250,7 +250,7 @@ func (as *ArticleRepositoty) HotAuthor() (users []model.User) {
 		log.Println(err.Error())
 		return nil
 	}
-	log.Println(len(result))
+
 	users = make([]model.User, 0)
 	for _, v := range result {
 		u := make([]model.User, 0)
