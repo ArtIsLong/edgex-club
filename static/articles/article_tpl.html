@@ -181,12 +181,12 @@
                 </div>
               </div>
             </div>
-            <div class="panel panel-default">
-              <div class="panel-heading x-title">热门文章</div>
+            <div class="panel panel-default x-hot-article">
+              <div class="panel-heading">热门文章</div>
               <div class="panel-body">
-
+                  
               </div>
-            </div>
+          </div>
 
           </div>
           <div class="col-sm-9 col-md-9 col-lg-9">
@@ -505,8 +505,28 @@
           }
       }
 
-      $(document).ready(function () {
+      function loadHotArticle(){
+            $.ajax({
+                url:'/api/v1/hotArticle',
+                type:'GET',
+                success:function(data){
+                $("div.x-hot-article .panel-body").empty();
+                var rowData = '<ul class="list-unstyled">';
+                $.each(data,function(i,e){
+                        var path = "/articles/users/" + e.userName + "/" + e.id;
+                        rowData += '<li><a href="'+path+'" class="" target="_blank"><u>'+e.title+'</u></a></li>';  
+                });
+                rowData+='</ul>';
+                $("div.x-hot-article .panel-body").append(rowData)
+                },
+                error:function(){
 
+                }
+            });
+        }
+
+      $(document).ready(function () {
+        loadHotArticle();
         $.ajaxSetup({
             cache:false,//prevent browser cache result to redirect  failed.
             headers:{"edgex-club-token":window.localStorage.getItem("edgex-club-token")},
