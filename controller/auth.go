@@ -19,8 +19,9 @@ import (
 )
 
 type ReturnLoginUserToPageData struct {
-	UserInfo string
-	Token    string
+	UserInfo    string
+	Token       string
+	UserPrePage string
 }
 type UserInfo struct {
 	Id         int64
@@ -90,6 +91,7 @@ func LoginByGitHub(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := r.URL.Query()
 	code := vars["code"][0]
+	userPrePage := vars["state"][0]
 
 	githubtoken := getGithubTokenByCode(code)
 	githubUserInfo := getUserInfoByToken(githubtoken)
@@ -124,8 +126,9 @@ func LoginByGitHub(w http.ResponseWriter, r *http.Request) {
 
 	t, _ := template.ParseFiles("static/init.html")
 	data := ReturnLoginUserToPageData{
-		UserInfo: string(mJson),
-		Token:    token,
+		UserInfo:    string(mJson),
+		Token:       token,
+		UserPrePage: userPrePage,
 	}
 
 	t.Execute(w, data)
