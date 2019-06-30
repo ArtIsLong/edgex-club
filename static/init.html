@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>EdgeXFoundry中国社区</title>
     <script type="text/javascript">
-        window.onload(function(){
+        window.onload = function(){
           var token = {{.Token}};
           var userInfo = {{.UserInfo}};
           window.localStorage.setItem("edgex-club-token",token);
@@ -12,7 +12,7 @@
           var userHistoryPage = window.localStorage.getItem("edgex-club-user-history");
           window.localStorage.removeItem("edgex-club-user-history");
           window.location.href = userHistoryPage; 
-        });
+        }
     // (function(){
     //   var token = {{.Token}};
     //   var userInfo = {{.UserInfo}};
