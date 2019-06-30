@@ -10,9 +10,9 @@ import (
 func GeneralFilter(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//log.Println("GeneralFilter=====")
-		log.Println("GeneralFilter===path==" + path)
-		path := r.URL.Path
 
+		path := r.URL.Path
+		log.Println("GeneralFilter===path==" + path)
 		if path == "/" {
 			http.FileServer(http.Dir("static")).ServeHTTP(w, r)
 			return
