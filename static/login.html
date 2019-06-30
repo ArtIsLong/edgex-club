@@ -59,6 +59,9 @@
         function onloginbygithub() {
             $("div.login_shield").show();
             var userPage = document.referrer;
+            if (userPage == "https://www.edgexfoundry.club/login.html") {
+                userPage = "https://www.edgexfoundry.club";
+            }
             window.localStorage.setItem("edgex-club-user-history", userPage)
             var href = "https://github.com/login/oauth/authorize?client_id=173d78b242d4fc35aca9&amp;scope=user&amp;state=any"
             window.location.href = href

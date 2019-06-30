@@ -111,16 +111,20 @@ func LoginByGitHub(w http.ResponseWriter, r *http.Request) {
 	token := util.GetMd5String(u.Name)
 	cache.TokenCache[token] = u
 
-	log.Println("User: " + u.Name + " login.")
+	log.Printf("User login: %v", u)
+	//log.Println("User: " + u.Name + " login.")
 	m := make(map[string]string)
 	m["name"] = u.Name
 	m["avatarUrl"] = u.AvatarUrl
 	m["id"] = u.Id.Hex()
-	m_json, _ := json.Marshal(m)
+	mJson, err := json.Marshal(m)
+	if err != nil {
+		log.Printf("user : %v login failed !", u)
+	}
 
 	t, _ := template.ParseFiles("static/init.html")
 	data := ReturnLoginUserToPageData{
-		UserInfo: string(m_json),
+		UserInfo: string(mJson),
 		Token:    token,
 	}
 
