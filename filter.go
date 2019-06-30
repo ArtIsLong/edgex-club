@@ -2,7 +2,7 @@ package main
 
 import (
 	_ "edgex-club/cache"
-	_ "log"
+	"log"
 	"net/http"
 	"strings"
 )
