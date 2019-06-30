@@ -2,17 +2,14 @@ package main
 
 import (
 	_ "edgex-club/cache"
-	"log"
 	"net/http"
 	"strings"
 )
 
 func GeneralFilter(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//log.Println("GeneralFilter=====")
-
 		path := r.URL.Path
-		log.Println("GeneralFilter===path==" + path)
+		//log.Println("GeneralFilter===path==" + path)
 		if path == "/" {
 			http.FileServer(http.Dir("static")).ServeHTTP(w, r)
 			return
