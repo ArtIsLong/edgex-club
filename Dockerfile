@@ -24,8 +24,8 @@ RUN echo "https://mirrors.ustc.edu.cn/alpine/v3.6/main" > /etc/apk/repositories
 RUN echo "https://mirrors.ustc.edu.cn/alpine/v3.6/community" >> /etc/apk/repositories
 RUN cat /etc/apk/repositories
 
-#解决无法掉转到github认证登陆界面，因为没有证书
-#RUN apk update && apk --no-cache add ca-certificates
+#解决无法掉转到github认证登陆界面，因为没有证书(即使更新了tls服务，但是没有发起tls的client造成)
+RUN apk update && apk --no-cache add ca-certificates
 
 WORKDIR /edgex-club/
 COPY --from=builder /go/src/edgex-club/edgex-club-linux .
