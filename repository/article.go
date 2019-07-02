@@ -72,7 +72,7 @@ func (as *ArticleRepositoty) FindAllReplyByCommentId(commentId string) []model.R
 	defer ds.S.Close()
 	replys := make([]model.Reply, 0)
 	col := ds.S.DB("edgex-club").C("reply")
-	col.Find(bson.M{"commentId": commentId}).Sort("-created").All(&replys)
+	col.Find(bson.M{"commentId": commentId}).Sort("created").All(&replys)
 	return replys
 }
 
