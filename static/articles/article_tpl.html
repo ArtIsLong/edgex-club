@@ -365,7 +365,7 @@
           type:"POST",
           data:JSON.stringify({"content":reply_context}),
           success:function(data){
-            console.log(data)
+            
             var str = '<div class="per_reply_item" id="'+data.id+'"  userName="'+data.fromUserName+'" style="border-bottom:1px solid gray;margin-bottom:5px;">'
                 str += '<div class="">'
                 str += '<a href="/users/'+data.fromUserName+'" target="_blank">'+data.fromUserName+'：</a> 回复<a href="http://localhost:8080/users/'+data.toUserName+'" target="_blank">@'+data.toUserName+'：</a>'
@@ -384,7 +384,7 @@
                 str += '提交回复'
                 str += '</div></div></div></div>'
 
-            $(reply_list).prepend(str);
+            $(reply_list).append(str);
             $(reply_list).show();
             hideReply();
           },
