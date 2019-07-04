@@ -52,12 +52,22 @@ func main() {
 			log.Println("TLS Server Listen On Port: 443")
 			log.Fatal(server.ListenAndServeTLS("./env/edgex-club-nginx.crt", "./env/edgex-club-nginx.key"))
 		}()
+		log.Println("Server Listen On Port: 8080")
+		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "https://www.edgexfoundry.club"+r.RequestURI, http.StatusMovedPermanently)
+		})); err != nil {
+			log.Fatalf("ListenAndServe error: %v", err)
+		}
+	} else {
+
+		server := &http.Server{
+			Handler:      GeneralFilter(limit(r)),
+			Addr:         ":8080",
+			WriteTimeout: 15 * time.Second,
+			ReadTimeout:  15 * time.Second,
+		}
+		log.Println("Dev Server Listen On Port: 8080")
+		log.Fatal(server.ListenAndServe())
 	}
 
-	log.Println("Server Listen On Port: 8080")
-	if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://www.edgexfoundry.club"+r.RequestURI, http.StatusMovedPermanently)
-	})); err != nil {
-		log.Fatalf("ListenAndServe error: %v", err)
-	}
 }

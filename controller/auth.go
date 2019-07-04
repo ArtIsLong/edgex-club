@@ -2,10 +2,9 @@ package controller
 
 import (
 	"bytes"
-	"edgex-club/cache"
+	"edgex-club/authorization"
 	"edgex-club/model"
 	"edgex-club/repository"
-	"edgex-club/util"
 	"encoding/json"
 	"html/template"
 	"io/ioutil"
@@ -15,6 +14,7 @@ import (
 	"strings"
 	_ "time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	mux "github.com/gorilla/mux"
 )
 
@@ -23,7 +23,7 @@ type ReturnLoginUserToPageData struct {
 	Token       string
 	UserPrePage string
 }
-type UserInfo struct {
+type GithubUserInfo struct {
 	Id         int64
 	Login      string
 	Avatar_url string
@@ -34,13 +34,18 @@ func ValidToken(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	token := vars["token"]
 
-	_, ok := cache.TokenCache[token]
 	var isVaild string
-	if ok {
-		isVaild = "1" //有效
-	} else {
+	jwtToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return authorization.JWTKey, nil
+	})
+
+	//包括超时、被篡改等，都会无效
+	if err != nil || !jwtToken.Valid {
 		isVaild = "0" //无效
+	} else {
+		isVaild = "1" //有效
 	}
+
 	w.Header().Set("Content-Type", "text/plain;charset=utf-8")
 	w.Write([]byte(isVaild))
 }
@@ -67,16 +72,28 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ok {
-		token := util.GetMd5String(name)
-		cache.TokenCache[token] = u
+		var creds model.Credentials
+
 		log.Println("User: " + name + " login.")
-		m["avatarUrl"] = "https://avatars1.githubusercontent.com/u/42457890?v=4"
-		m["id"] = "5bc0081dcedad5121dccebff"
+		creds.AvatarUrl = "https://avatars1.githubusercontent.com/u/42457890?v=4"
+		creds.Id = "5bc0081dcedad5121dccebff"
+		creds.Name = name
+
+		token, err := authorization.NewToken(creds)
+		if err != nil {
+			log.Println("生成token失败！")
+			w.WriteHeader(http.StatusBadRequest)
+		}
 
 		mm := make(map[string]interface{})
 		mm["token"] = token
-		mm["userInfo"] = m
+		mm["userInfo"] = creds
 		result, _ := json.Marshal(mm)
+		http.SetCookie(w, &http.Cookie{
+			Name:  "edgex-club-token",
+			Value: token,
+			//Expires: expirationTime,
+		})
 		w.Header().Set("Content-Type", "application/json;charset=utf-8")
 		w.Write(result)
 	} else {
@@ -94,15 +111,16 @@ func LoginByGitHub(w http.ResponseWriter, r *http.Request) {
 	userPrePage := vars["state"][0]
 
 	githubtoken := getGithubTokenByCode(code)
-	githubUserInfo := getUserInfoByToken(githubtoken)
+	userInfo := getUserInfoByToken(githubtoken)
 
-	var userInfo = UserInfo{}
-	jsonStr := bytes.NewReader([]byte(githubUserInfo))
-	json.NewDecoder(jsonStr).Decode(&userInfo)
+	var githubUserInfo = GithubUserInfo{}
+	jsonStr := bytes.NewReader([]byte(userInfo))
+	json.NewDecoder(jsonStr).Decode(&githubUserInfo)
 
-	userName := userInfo.Login
-	userId := strconv.FormatInt(userInfo.Id, 10)
-	avatarUrl := userInfo.Avatar_url
+	userName := githubUserInfo.Login
+	userId := strconv.FormatInt(githubUserInfo.Id, 10)
+	avatarUrl := githubUserInfo.Avatar_url
+
 	u := model.User{Name: userName, GitHubId: userId, AvatarUrl: avatarUrl}
 	ok, _ := repository.UserRepos.ExistsByGitHub(u)
 	if !ok {
@@ -110,26 +128,34 @@ func LoginByGitHub(w http.ResponseWriter, r *http.Request) {
 		log.Println("user not exist, it's a new user,save to db.")
 	}
 	u = repository.UserRepos.FindOneByName(u.Name)
-	token := util.GetMd5String(u.Name)
-	cache.TokenCache[token] = u
 
-	log.Printf("User login: %v", u)
-	//log.Println("User: " + u.Name + " login.")
-	m := make(map[string]string)
-	m["name"] = u.Name
-	m["avatarUrl"] = u.AvatarUrl
-	m["id"] = u.Id.Hex()
-	mJson, err := json.Marshal(m)
+	var creds model.Credentials
+
+	token, err := authorization.NewToken(creds)
 	if err != nil {
-		log.Printf("user : %v login failed !", u)
+		log.Println("生成token失败！")
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	t, _ := template.ParseFiles("static/init.html")
+	log.Printf("User login: %v", u)
+
+	creds.Name = u.Name
+	creds.AvatarUrl = u.AvatarUrl
+	creds.Id = u.Id.Hex()
+	credsByte, err := json.Marshal(creds)
+
+	t, _ := template.ParseFiles("static/redirect.html")
 	data := ReturnLoginUserToPageData{
-		UserInfo:    string(mJson),
+		UserInfo:    string(credsByte),
 		Token:       token,
 		UserPrePage: userPrePage,
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "edgex-club-token",
+		Value: token,
+		//Expires: expirationTime,
+	})
 
 	t.Execute(w, data)
 }

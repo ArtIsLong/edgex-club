@@ -74,12 +74,12 @@
             color: black!important;
             cursor: default!important;
         }
+        
         span.article_operation_edit {
             cursor: default!important;
         }
-
-        .x-hot-article li{
-      
+        
+        .x-hot-article li {
             padding: 3px 0;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -118,8 +118,8 @@
                     <div class="panel-heading x-title">作者信息</div>
                     <div class=" panel-body">
                         <div class="user_profile">
-                            <a href="/users/{{.UserName}}"><img src="{{.AvatarUrl}}" alt=""></a>
-                            <a href="/users/{{.UserName}}">
+                            <a href="/user/{{.UserName}}"><img src="{{.AvatarUrl}}" alt=""></a>
+                            <a href="/user/{{.UserName}}">
                                 <span>{{.UserName}}</span>
                             </a>
                         </div>
@@ -139,7 +139,7 @@
                 <div class="panel panel-default x-hot-article">
                     <div class="panel-heading">热门文章</div>
                     <div class="panel-body">
-                        
+
                     </div>
                 </div>
             </div>
@@ -186,30 +186,30 @@
         (function() {
             var hm = document.createElement("script");
             hm.src = "https://hm.baidu.com/hm.js?33ac76c70e637460d49b396f378efab8";
-            var s = document.getElementsByTagName("script")[0]; 
+            var s = document.getElementsByTagName("script")[0];
             s.parentNode.insertBefore(hm, s);
         })();
     </script>
-    
-    <script type="text/javascript">
-        var userId = {{.UserId}}
-        var userName = {{.UserName}}
 
-        function loadHotArticle(){
+    <script type="text/javascript">
+        var userId = "{{.UserId}}"
+        var userName = "{{.UserName}}"
+
+        function loadHotArticle() {
             $.ajax({
-                url:'/api/v1/hotArticle',
-                type:'GET',
-                success:function(data){
-                $("div.x-hot-article .panel-body").empty();
-                var rowData = '<ul class="list-unstyled">';
-                $.each(data,function(i,e){
-                        var path = "/articles/users/" + e.userName + "/" + e.id;
-                        rowData += '<li><a href="'+path+'" class="" target="_blank"><u>'+e.title+'</u></a></li>';  
-                });
-                rowData+='</ul>';
-                $("div.x-hot-article .panel-body").append(rowData)
+                url: '/api/v1/hotArticle',
+                type: 'GET',
+                success: function(data) {
+                    $("div.x-hot-article .panel-body").empty();
+                    var rowData = '<ul class="list-unstyled">';
+                    $.each(data, function(i, e) {
+                        var path = "/user/" + e.userName + "/article/" + e.id;
+                        rowData += '<li><a href="' + path + '" class="" target="_blank"><u>' + e.title + '</u></a></li>';
+                    });
+                    rowData += '</ul>';
+                    $("div.x-hot-article .panel-body").append(rowData)
                 },
-                error:function(){
+                error: function() {
 
                 }
             });
@@ -217,12 +217,13 @@
 
         function updateMessage(event) {
             var msgId = $(event.currentTarget).attr("msgId");
+            var userInfo = JSON.parse(window.localStorage.getItem("edgex-club-userInfo"));
             $.ajax({
-                url: "/api/v1/message/" + msgId,
+                url: "/api/v1/auth/message/" + msgId,
                 type: "PUT",
                 success: function() {
                     $.ajax({
-                        url: "/api/v1/message/count",
+                        url: "/api/v1/auth/message/" + userInfo.name + "/count",
                         type: "GET",
                         success: function(data) {
                             if (data == 0) {
@@ -241,7 +242,33 @@
         }
 
         $(document).ready(function() {
+            $.ajaxSetup({
+                cache: false, //prevent browser cache result to redirect  failed.
+                headers: {
+                    "edgex-club-token": window.localStorage.getItem("edgex-club-token")
+                },
+                statusCode: {
+                    302: function() {
+                        window.location.href = '/login.html?ran=' + Math.random(); //prevent browser cache result to redirect  failed.
+                    },
+                    429: function() {
+                        //alert("当前操作过于频繁，请稍后再试！");
+                    },
+                    401: function() {
+                        window.location.href = '/login.html?ran=' + Math.random();
+                    },
+                    400: function() {
+                        window.location.href = '/error.html?ran=' + Math.random();
+                    }
+
+                }
+            });
             loadHotArticle();
+            loadUserMessage();
+            loadUserAllArticles();
+        });
+
+        function loadUserMessage() {
             if (!edgexClubMainModule.loginIsVaild) {
                 $("#message").hide();
             }
@@ -251,56 +278,49 @@
                     $("#message").hide();
                 } else {
                     $.ajax({
-                        url: "/api/v1/message",
+                        url: "/api/v1/auth/message/" + userInfo.name,
                         type: "GET",
                         success: function(data) {
+
                             if (data.length == 0) {
                                 $("#message").hide();
                             }
                             for (var i = 0; i < data.length; i++) {
                                 var d = data[i];
                                 var isRead = "";
+                                var statusColor = "";
                                 if (d.isRead) {
                                     isRead = "已读";
                                 } else {
                                     isRead = "未读";
+                                    statusColor = "#f0ad4e;"
                                 }
-                                var a = '<a msgId="' + d.id + '" target="_blank" onclick="updateMessage(event)" href="/articles/users/' + d.articleUserName + '/' + d.articleId + '" class="list-group-item" ><span style="clear:both;display:inline-block;width:50%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">' + d.content + '</span> <span class="badge">' + edgexFmtDate(d.created) + '</span><span class="badge">' + isRead + '</span></a>'
+                                var a = '<a msgId="' + d.id + '" target="_blank" onclick="updateMessage(event)" href="/user/' + d.articleUserName + '/article/' + d.articleId + '" class="list-group-item" ><span style="clear:both;display:inline-block;width:50%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">' + d.content + '</span> <span class="badge">' + edgexFmtDate(d.created) + '</span><span class="badge" style="color:' + statusColor + '">' + isRead + '</span></a>'
                                 $("#message div.panel-body").append(a)
                             }
                         }
                     });
                 }
             }
+        }
 
+        function loadUserAllArticles() {
+            var userInfo = JSON.parse(window.localStorage.getItem("edgex-club-userInfo"));
+            var url = "";
+            if (userId == userInfo.id) { //所有文章
+                url = "/api/v1/auth/article/" + userId + "/all"
+            } else { //所有已经发布审核的文章
+                url = "/api/v1/article/" + userId + "/public"
+            }
             $.ajax({
-                url: "/articles/users/" + userId,
+                url: url,
                 type: "GET",
                 success: function(data) {
+
                     var articles = data;
-                    var userInfo = JSON.parse(window.localStorage.getItem("edgex-club-userInfo"));
+
                     for (var i = 0; i < articles.length; i++) {
-                        var path = "/articles/users/" + articles[i].userName + "/" + articles[i].id;
-                        // var row = '<div class="article_body">';
-                        // row += '<div class="user_profile" style="margin-left:10px;padding-top:5px;">';
-                        // row += '<img src="{{.AvatarUrl}}" alt=""></div>';
-                        //
-                        // row += '<div class="article_title">';
-                        // row += '<a href=\'' + path + '\' target="_blank">' + articles[i].title + '</a>';
-                        // if(edgexClubMainModule.loginIsVaild){
-                        //   if(userInfo.id == userId){
-                        //     if (articles[i].approved) {
-                        //       row += '<span class="label label-success" style="float:right;margin-right:5px;">已审核</span>';
-                        //     } else {
-                        //       row += '<span class="label label-warning" style="float:right;margin-right:5px;">审核中</span>';
-                        //     }
-                        //   }
-                        // }
-                        // row += '</div>';
-                        // row += '<div class="article_intro" articlesId="'+articles[i].id+'">';
-                        // row += '<span style="background-color:rgba(148, 44, 73, 0.5);border-radius:3px;color:white;padding:3px;">' + articles[i].type + '</span>&nbsp;&nbsp;<span class="badge">' + edgexFmtDate(articles[i].created) + '</span>';
-                        // row += '<div class="article_operation" style="display:none;margin-right:5px;float:right;color:rgba(148, 44, 73, 0.5);padding:3px;"><a><span class="edit">编辑</span></a>&nbsp;&nbsp;<a><span class="delete">删除</span></a><div>';
-                        // row += '</div></div>';
+                        var path = "/user/" + articles[i].userName + "/article/" + articles[i].id;
 
                         var row = '<li href="" class="list-group-item article_body"><div class="media">';
 
@@ -311,7 +331,7 @@
                         row += '</div>';
 
                         row += '<div class="media-body">';
-                        
+
                         row += '<h4 class="media-heading "><a class="" href=\'' + path + '\' target="_blank">' + articles[i].title + '</a></h4>';
 
                         row += '<div class="" >';
@@ -319,18 +339,16 @@
                         if (edgexClubMainModule.loginIsVaild) {
                             if (userInfo.id == userId) {
                                 if (articles[i].approved) {
-                                    row += '<span articlesId="'+articles[i].id+'" class="label label-default pull-right article_operation_edit">编辑</span><span class="label label-success" style="float:right;margin-right:5px;">已审核</span>';
+                                    row += '<span articlesId="' + articles[i].id + '" class="label label-default pull-right article_operation_edit">编辑</span><span class="label label-success" style="float:right;margin-right:5px;">已审核</span>';
                                 } else {
-                                    row += '<span articlesId="'+articles[i].id+'" class="label label-default pull-right article_operation_edit">编辑</span><span class="label label-warning" style="float:right;margin-right:5px;">审核中</span>';
+                                    row += '<span articlesId="' + articles[i].id + '" class="label label-default pull-right article_operation_edit">编辑</span><span class="label label-warning" style="float:right;margin-right:5px;">审核中</span>';
                                 }
 
                             }
                         }
                         row += '</div>';
-
                         row += '</div>';
                         row += '</div></li>';
-
                         $("div.x-article-body").append(row);
                     }
                     if (edgexClubMainModule.loginIsVaild) {
@@ -349,9 +367,7 @@
                     });
                 }
             });
-
-
-        });
+        }
 
         function deleteArticle() {
             $('#myModal').modal('hide');

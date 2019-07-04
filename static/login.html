@@ -50,7 +50,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: rgba(244,245,245, 0.7);
+            background-color: rgba(244, 245, 245, 0.7);
             z-index: 999;
         }
     </style>
@@ -59,13 +59,13 @@
         function onloginbygithub() {
             $("div.login_shield").show();
             var userPage = document.referrer;
-            
+
             if (userPage == "https://www.edgexfoundry.club/login.html") {
                 userPage = "https://www.edgexfoundry.club";
             }
             window.localStorage.setItem("edgex-club-user-history", userPage)
             var stateStr = encodeURI(userPage);
-            var href = "https://github.com/login/oauth/authorize?client_id=173d78b242d4fc35aca9&amp;scope=user&amp;state="+ stateStr;
+            var href = "https://github.com/login/oauth/authorize?client_id=173d78b242d4fc35aca9&amp;scope=user&amp;state=" + stateStr;
             window.location.href = href
         }
 
@@ -87,7 +87,6 @@
                     //debugger
                     window.localStorage.setItem("edgex-club-token", data["token"])
                     window.localStorage.setItem("edgex-club-userInfo", JSON.stringify(data["userInfo"]))
-
                     window.location.href = document.referrer
                 },
                 error: function(data) {
@@ -107,7 +106,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-6 col-md-6 col-lg-6">
-                    <!-- <form class="login_form">
+                    <form class="login_form">
                         <div class="form-group">
                             <label for="userName">用户名</label>
                             <input type="text" class="form-control" id="userName" placeholder=" ">
@@ -119,7 +118,7 @@
                         </div>
 
                         <button type="button" onclick="login();" class="btn">Submit</button>
-                    </form> -->
+                    </form>
                 </div>
                 <div class="col-sm-6 col-md-6 col-lg-6">
                     <div class="loginbygithub">

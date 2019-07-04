@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"edgex-club/cache"
 	"edgex-club/model"
 	reposi "edgex-club/repository"
 	"encoding/json"
@@ -98,12 +97,9 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 
 func FindAllMessage(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	token := r.Header.Get("edgex-club-token")
-	user := cache.TokenCache[token]
-
-	msgs := reposi.ArticleRepos.FindAllMessage(user.Name)
-	log.Println(msgs)
+	vars := mux.Vars(r)
+	userName := vars["userName"]
+	msgs := reposi.ArticleRepos.FindAllMessage(userName)
 	result, _ := json.Marshal(&msgs)
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.Write(result)
@@ -111,36 +107,30 @@ func FindAllMessage(w http.ResponseWriter, r *http.Request) {
 
 func FindAllMessageCount(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	token := r.Header.Get("edgex-club-token")
-	user := cache.TokenCache[token]
-
-	msgs_count := reposi.ArticleRepos.FindAllMessageCount(user.Name)
-	log.Println(msgs_count)
+	vars := mux.Vars(r)
+	userName := vars["userName"]
+	msgsCount := reposi.ArticleRepos.FindAllMessageCount(userName)
 
 	w.Header().Set("Content-Type", "text/plain;charset=utf-8")
-	w.Write([]byte(strconv.Itoa(msgs_count)))
+	w.Write([]byte(strconv.Itoa(msgsCount)))
 }
 
 func PostReply(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := mux.Vars(r)
 	commentId := vars["commentId"]
-	token := r.Header.Get("edgex-club-token")
-	user, ok := cache.TokenCache[token]
-	if !ok || user.Name == "" {
-		log.Println("非法用户尝试访问认证API")
-		http.Error(w, "非法用户", 302)
-		return
-	}
 
-	fromUserName := user.Name
+	userStr := r.Header.Get("inner-user")
+	var creds model.Credentials
+	json.Unmarshal([]byte(userStr), &creds)
+
+	fromUserName := creds.Name
 	toUserName := vars["toUserName"]
 	var reply model.Reply
 	json.NewDecoder(r.Body).Decode(&reply)
 	isVaild, content := hanleContent(reply.Content)
 	if isVaild {
-		log.Println(user.Name + ": 回复有垃圾语言")
+		log.Println(creds.Name + ": 回复有垃圾语言")
 		http.Error(w, "非法字符", 3001)
 		return
 	}
@@ -169,34 +159,29 @@ func PostComment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	articleId := vars["articleId"]
 
-	token := r.Header.Get("edgex-club-token")
-	user, ok := cache.TokenCache[token]
-	if !ok || user.Name == "" {
-		log.Println("非法用户尝试访问认证API")
-		http.Error(w, "非法用户", 302)
-		return
-	}
-	userName := user.Name
+	userStr := r.Header.Get("inner-user")
+	var creds model.Credentials
+	json.Unmarshal([]byte(userStr), &creds)
 
 	var c model.Comment
 	json.NewDecoder(r.Body).Decode(&c)
 
 	isVaild, content := hanleContent(c.Content)
 	if isVaild {
-		log.Println(user.Name + ": 评论有垃圾语言")
+		log.Println(creds.Name + ": 评论有垃圾语言")
 		http.Error(w, "非法字符", 3001)
 		return
 	}
 	c.Content = content
-	c.UserName = userName
+	c.UserName = creds.Name
 	c.ArticleId = articleId
-	c.UserAvatarUrl = user.AvatarUrl
+	c.UserAvatarUrl = creds.AvatarUrl
 
 	c = reposi.ArticleRepos.PostComment(c)
-	log.Println("用户：" + userName + " 发起了评论")
+	log.Println("用户：" + creds.Name + " 发起了评论")
 	go func() {
 		articleUserName := reposi.ArticleRepos.FindArticleUserByArticleId(articleId)
-		message(articleUserName, userName, articleId, articleUserName, "comment")
+		message(articleUserName, creds.Name, articleId, articleUserName, "comment")
 	}()
 
 	result, _ := json.Marshal(&c)
@@ -216,10 +201,13 @@ func FindAllArticlesByUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := mux.Vars(r)
 	userId := vars["userId"]
-	token := r.Header.Get("edgex-club-token")
-	user, ok := cache.TokenCache[token]
+
+	userStr := r.Header.Get("inner-user")
+	var creds model.Credentials
+	json.Unmarshal([]byte(userStr), &creds)
+
 	var articles []model.Article
-	if ok && user.Id.Hex() == userId {
+	if creds.Id == userId {
 		articles = reposi.ArticleRepos.FindAllArticlesByUser(userId, false)
 	} else {
 		articles = reposi.ArticleRepos.FindAllArticlesByUser(userId, true)
@@ -261,15 +249,13 @@ func SaveNewArticle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["userId"]
 	err := json.NewDecoder(r.Body).Decode(&a)
-	token := r.Header.Get("edgex-club-token")
-	user, ok := cache.TokenCache[token]
-	if !ok || user.Name == "" {
-		log.Println("非法用户尝试访问认证API")
-		http.Error(w, "非法用户", 302)
-		return
-	}
+
+	userStr := r.Header.Get("inner-user")
+	var creds model.Credentials
+	json.Unmarshal([]byte(userStr), &creds)
+
 	a.UserId = userId
-	a.AvatarUrl = user.AvatarUrl
+	a.AvatarUrl = creds.AvatarUrl
 	a.Approved = false
 
 	if err != nil {
@@ -278,7 +264,7 @@ func SaveNewArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	result := reposi.ArticleRepos.SaveOne(a)
-	log.Println("用户：" + user.Name + " 保存了文章 ")
+	log.Println("用户：" + creds.Name + " 保存了文章 ")
 
 	w.Header().Set("Content-Type", "text/plain;charset=utf-8")
 	w.Write([]byte(result))
@@ -291,50 +277,45 @@ func UpdateArticle(w http.ResponseWriter, r *http.Request) {
 	articleId := vars["articleId"]
 	err := json.NewDecoder(r.Body).Decode(&a)
 
-	token := r.Header.Get("edgex-club-token")
-	user, ok := cache.TokenCache[token]
-	if !ok || user.Name == "" {
-		log.Println("非法用户尝试访问认证API")
-		http.Error(w, "非法用户", 302)
-		return
+	userStr := r.Header.Get("inner-user")
+	var creds model.Credentials
+	json.Unmarshal([]byte(userStr), &creds)
+
+	if err != nil {
+		log.Printf("%s：用户提交的文章无法解析", creds.Name)
+		w.WriteHeader(http.StatusBadRequest)
 	}
-	a.UserId = user.Id.Hex()
-	a.AvatarUrl = user.AvatarUrl
+
+	a.UserId = creds.Id
+	a.AvatarUrl = creds.AvatarUrl
 	a.Approved = false
-	isExist := reposi.ArticleRepos.Exists(articleId, user.Id.Hex())
+	isExist := reposi.ArticleRepos.Exists(articleId, creds.Id)
 
 	if !isExist {
-		log.Printf("非法用户: %v", err)
-		http.Error(w, "非法用户", http.StatusBadRequest)
+		log.Printf("非法用户尝试修改不属于自己的文章: %s", creds.Name)
+		http.Error(w, "非法用户", 3001)
+		return
 	}
 
 	reposi.ArticleRepos.UpdateOne(articleId, a)
-	log.Println("用户：" + user.Name + " 更新了文章 " + articleId)
+	log.Println("用户：" + creds.Name + " 更新了文章 " + articleId)
 }
 
 func LoadEditArticleTemplate(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	// vars_url := r.URL.Query();
-	// userName := vars_url["userName"][0]
 
 	vars := mux.Vars(r)
 	articleId := vars["articleId"]
 	userName := vars["userName"]
 
-	// token := r.Header.Get("edgex-club-token")
-	// log.Println("token=====")
-	// log.Println(token)
-	// user := cache.TokenCache[token]
-	// log.Println("user=====")
-	// log.Println(user)
 	var a model.Article
 	var data TodoPageData
-	if articleId == "new" {
+	if articleId == "new" { //新文章
 		articleId = ""
 		data = TodoPageData{
 			ArticleId: articleId,
 		}
-	} else {
+	} else { //编辑已有文章
 		a = reposi.ArticleRepos.FindOne(userName, articleId)
 
 		data = TodoPageData{

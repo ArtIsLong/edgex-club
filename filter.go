@@ -1,7 +1,9 @@
 package main
 
 import (
-	_ "edgex-club/cache"
+	"edgex-club/authorization"
+	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -26,21 +28,32 @@ func GeneralFilter(h http.Handler) http.Handler {
 			return
 		}
 
-		// if strings.HasPrefix(path,"/api/v1/") &&
-		//    path != "/api/v1/loginbygithub" &&
-		// 	 path != "/api/v1/login" && {
-		// 	token := r.Header.Get("edgex-club-token")
-		//
-		// 	//判断token是否在缓存中，且有效
-		// 	_,ok := cache.TokenCache[token]
-		//
-		// 	if !ok {
-		// 		log.Println("非法用户尝试访问认证API")
-		// 		// http.Error(w, "非法用户", http.StatusBadRequest)
-		// 		http.Redirect(w, r, "/login.html", 302)
-		// 		return
-		// 	}
-		// }
+		//检测认证API是否携带有效jwt token
+		if strings.HasPrefix(path, "/api/v1/auth") {
+			token := r.Header.Get("edgex-club-token")
+			if token == "" {
+				log.Println("token 为空！")
+				tokenS, _ := r.Cookie("edgex-club-token")
+				token = tokenS.Value
+				// w.WriteHeader(http.StatusUnauthorized)
+				// return
+			}
+			claims := &authorization.Claims{}
+			ok := false
+			if ok, claims = authorization.CheckToken(token); !ok {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			credsByte, err := json.Marshal(claims.Credentials)
+
+			if err != nil {
+				log.Println("转换creds失败！")
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			//重写请求头，用于下游服务中使用，比如一些controller中需要用到用户信息
+			r.Header.Set("inner-user", string(credsByte))
+		}
 
 		h.ServeHTTP(w, r)
 	})

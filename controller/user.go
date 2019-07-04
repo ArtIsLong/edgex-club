@@ -4,10 +4,11 @@ import (
 	model "edgex-club/model"
 	respos "edgex-club/repository"
 	"encoding/json"
-	mux "github.com/gorilla/mux"
 	"html/template"
 	"log"
 	"net/http"
+
+	mux "github.com/gorilla/mux"
 )
 
 type TodoPageUserData struct {
@@ -42,8 +43,7 @@ func UserHome(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userName := vars["userName"]
 	u := respos.UserRepos.FindOneByName(userName)
-	log.Println("userHome===")
-	log.Println(u)
+
 	articleCount := respos.ArticleRepos.UserArticleCount(userName)
 
 	t, _ := template.ParseFiles("static/users/home.html")
