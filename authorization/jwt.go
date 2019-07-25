@@ -16,7 +16,7 @@ type Claims struct {
 }
 
 func NewToken(creds model.Credentials) (token string, err error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claim := &Claims{
 		Credentials: creds,
 		StandardClaims: jwt.StandardClaims{
