@@ -1,3 +1,11 @@
-.DS_Store
-./edgex-club
+.idea/
+vendor
+*.exe
 go.sum
+*.DS_Store
+cmd/edgex-club/edgex-club
+*.snap
+prime/
+squashfs-root/
+coverage.out
+VERSION

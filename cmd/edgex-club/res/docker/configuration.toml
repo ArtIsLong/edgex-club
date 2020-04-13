@@ -1,0 +1,18 @@
+[Service]
+Host = "localhost"
+Port = 8080
+Labels = [edgex club]
+OpenMsg = "edgex club server started"
+StaticResourcePath = "./static"
+
+[Database]
+Host = "localhost"
+DatabaseName = "edgex-club"
+Port = 8500
+Username = "edgex-club-db"
+Password = "Yanhua@1989"
+
+[Certificate]
+CertPath = "res/tls"
+Crt    = "edgex-club-nginx.crt"
+Key = "edgex-club-nginx.key"

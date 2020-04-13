@@ -1,4 +1,4 @@
-FROM golang:1.11-alpine AS builder
+FROM golang:1.13-alpine AS builder
 
 MAINTAINER Zhang huaqiao <yhzhq1989@163.com>
 
@@ -15,7 +15,7 @@ RUN apk update && apk --no-cache add ca-certificates && apk add git make
 
 COPY . .
 
-RUN CGO_ENABLED=0 GO111MODULE=on go build -o edgex-club-linux
+RUN make build
 
 FROM alpine:3.6
 
@@ -28,9 +28,7 @@ RUN cat /etc/apk/repositories
 RUN apk update && apk --no-cache add ca-certificates
 
 WORKDIR /edgex-club/
-COPY --from=builder /go/src/edgex-club/edgex-club-linux .
-COPY --from=builder /go/src/edgex-club/env ./env/
-COPY --from=builder /go/src/edgex-club/static ./static/
+COPY --from=builder /go/src/edgex-club/cmd/edgex-club/* .
 
 #RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 #COPY ./env/edgex-club.crt /usr/local/share/ca-certificates/edgex-club.crt
@@ -39,4 +37,4 @@ COPY --from=builder /go/src/edgex-club/static ./static/
 EXPOSE 443
 EXPOSE 8080
 
-ENTRYPOINT ["./edgex-club-linux", "-confpath=env/prod.yaml","-prod=true"]
+ENTRYPOINT ["./edgex-club", "-confpath=res/docker/configuration.toml","-prod=true"]

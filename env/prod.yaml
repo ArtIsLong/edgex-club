@@ -1,5 +1,0 @@
-db:
-  addr: "39.98.39.186:8500"
-  database: "edgex-club"
-  username: "edgex-club-db"
-  password: "Yanhua@1989"
