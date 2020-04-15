@@ -1,3 +1,6 @@
+# Copyright © 2020-2021 https://www.edgexfoundry.club. All Rights Reserved.
+# SPDX-License-Identifier: GPL-2.0 
+
 FROM golang:1.13-alpine AS builder
 
 MAINTAINER Zhang huaqiao <yhzhq1989@163.com>
@@ -24,7 +27,6 @@ RUN echo "https://mirrors.ustc.edu.cn/alpine/v3.6/main" > /etc/apk/repositories
 RUN echo "https://mirrors.ustc.edu.cn/alpine/v3.6/community" >> /etc/apk/repositories
 RUN cat /etc/apk/repositories
 
-#解决无法掉转到github认证登陆界面，因为没有证书(即使更新了tls服务，但是没有发起tls的client造成)
 RUN apk update && apk --no-cache add ca-certificates
 
 WORKDIR /edgex-club/

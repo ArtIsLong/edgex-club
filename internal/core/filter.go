@@ -1,3 +1,6 @@
+// Copyright © 2020-2021 https://www.edgexfoundry.club. All Rights Reserved.
+// SPDX-License-Identifier: GPL-2.0
+
 package core
 
 import (
@@ -13,21 +16,6 @@ func GeneralFilter(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 
-		// if path == "/" {
-		// 	http.FileServer(http.Dir("static")).ServeHTTP(w, r)
-		// 	return
-		// }
-		// if strings.HasSuffix(path, ".html") ||
-		// 	strings.HasSuffix(path, ".css") ||
-		// 	strings.HasSuffix(path, ".js") ||
-		// 	strings.HasSuffix(path, ".json") ||
-		// 	strings.HasSuffix(path, ".png") ||
-		// 	strings.HasSuffix(path, ".md") ||
-		// 	strings.HasSuffix(path, ".svg") ||
-		// 	strings.HasPrefix(path, "/vendors") {
-		// 	http.FileServer(http.Dir("static")).ServeHTTP(w, r)
-		// 	return
-		// }
 		if strings.HasPrefix(path, "/public/") {
 			http.FileServer(http.Dir("static")).ServeHTTP(w, r)
 			return

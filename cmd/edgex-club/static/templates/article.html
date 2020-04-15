@@ -1,3 +1,8 @@
+<!-- 
+// Copyright © 2020-2021 https://www.edgexfoundry.club. All Rights Reserved.
+// SPDX-License-Identifier: GPL-2.0 
+-->
+
 {{define "head"}}
 <title>EdgeXFoundry中国社区</title>
 <link rel="shortcut icon" type="image/x-icon" href="/public/img/bg_img.png" style="width:62px;height:62px;" />
@@ -130,8 +135,7 @@
 </style>
 </head>
 
-{{end}} 
-{{define "body"}}
+{{end}} {{define "body"}}
 
 <div class="user_article_main">
     <div class="container" style="margin-top:75px;">
@@ -162,13 +166,13 @@
                 <div class="panel panel-default x-hot-article">
                     <div class="panel-heading">热门文章</div>
                     <div class="panel-body">
-                        
+
                         <ul class="list-unstyled">
-                        {{range $k,$a := .HotArticles}}
+                            {{range $k,$a := .HotArticles}}
                             <li><a href="/user/{{$a.UserName}}/article/$a.Id.Hex" target="_blank"><u>{{$a.Title}}</u></a></li>
-                        {{end}}
+                            {{end}}
                         </ul>
-                        
+
                     </div>
                 </div>
 
@@ -208,7 +212,7 @@
                     <div class="panel-body" style="padding:10px;">
                         <div class="comment_list">
                             {{range $key,$comment := .Comments}}
-                            
+
                             <div class="per_item_comment" id="{{$comment.Id.Hex}}" commentId="{{$comment.Id.Hex}}" userName="{{$comment.UserName}}" style="clear:both;padding-bottom:40px;">
                                 <div class="comment_user_face" style="float:left;margin:0;padding:0;">
                                     <a href="/user/{{$comment.UserName}}" target="_blank">
@@ -227,9 +231,7 @@
                                             <div class="commit_reply" onclick="reply(event)" style="float:right;color:rgba(148, 44, 73, 0.5);">提交回复</div>
                                         </div>
                                         <div class="reply_list" style="background-color:#f4f5f5;clear:both;padding:5px;">
-                                            {{range $cId,$replys := $.ReplysMap}} 
-                                            {{if eq $cId $comment.Id.Hex}} 
-                                            {{range $idex,$r := $replys}}
+                                            {{range $cId,$replys := $.ReplysMap}} {{if eq $cId $comment.Id.Hex}} {{range $idex,$r := $replys}}
                                             <div class="per_reply_item" id="$r.Id.Hex" userName="{{$r.FromUserName}}" style="border-bottom:1px solid gray;margin-bottom:5px;">
                                                 <div class="">'
                                                     <a href="/user/{{$r.FromUserName}}" target="_blank">{{$r.FromUserName}}：</a> 回复<a href="/user/{{$r.ToUserName}}" target="_blank">@{{$r.ToUserName}}：</a> {{$r.Content}}
@@ -249,11 +251,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            {{else}}
-                                            {{end}} 
-                                            {{end}} 
-                                            {{else}} 
-                                            {{end}}
+                                            {{else}} {{end}} {{end}} {{else}} {{end}}
                                         </div>
                                     </div>
                                 </div>

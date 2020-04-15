@@ -1,3 +1,6 @@
+// Copyright © 2020-2021 https://www.edgexfoundry.club. All Rights Reserved.
+// SPDX-License-Identifier: GPL-2.0 
+
 $(document).ready(function() {
     $.ajaxSetup({
         cache: false, //prevent browser cache result to redirect  failed.

@@ -1,3 +1,8 @@
+<!-- 
+// Copyright © 2020-2021 https://www.edgexfoundry.club. All Rights Reserved.
+// SPDX-License-Identifier: GPL-2.0 
+-->
+
 {{define "head"}}
 
 <title>{{.UserName}}的主页</title>
@@ -78,8 +83,7 @@
     }
 </style>
 
-{{end}}
-{{define "body"}}
+{{end}} {{define "body"}}
 
 <div class="container" style="margin-top:75px;">
     <div class="row">
@@ -326,12 +330,11 @@
         // });
     }
 
-     $(document).ready(function() {
+    $(document).ready(function() {
         loadHotArticle();
         loadUserMessage();
         loadUserAllArticles();
     });
-
 </script>
 
 {{end}}
