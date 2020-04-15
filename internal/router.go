@@ -4,11 +4,14 @@ import (
 	"edgex-club/internal/handler"
 	"net/http"
 
-	mux "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 func InitRouter() http.Handler {
 	r := mux.NewRouter()
+
+	//加载首页
+	r.HandleFunc("/", handler.LoadIndexPage)
 
 	s := r.PathPrefix("/api/v1").Subrouter()
 
@@ -60,11 +63,17 @@ func InitRouter() http.Handler {
 	//====================用户主页===============================================
 	s1 := r.PathPrefix("").Subrouter()
 	//用户主页模板
-	s1.HandleFunc("/user/{userName}", handler.UserHome).Methods("GET")
+	s1.HandleFunc("/user/{userName}", handler.LoadUserHomePage).Methods("GET")
+	// s1.HandleFunc("/user/{userName}", handler.UserHome).Methods("GET")
+
 	//阅读某个用户的文章，加载公共文章模板
-	s1.HandleFunc("/user/{userName}/article/{articleId}", handler.FindOneArticle).Methods("GET")
+	s1.HandleFunc("/user/{userName}/article/{articleId}", handler.LoadArticlePage).Methods("GET")
+	// s1.HandleFunc("/user/{userName}/article/{articleId}", handler.FindOneArticle).Methods("GET")
+
 	//加载编辑、发帖模板
-	s1.HandleFunc("/article/edit/{userName}/{articleId}", handler.LoadEditArticleTemplate).Methods("GET")
+	s1.HandleFunc("/article/add", handler.LoadArticleAddPage).Methods("GET")
+	s1.HandleFunc("/article/edit/{userName}/{articleId}", handler.LoadArticleEditPage).Methods("GET")
+	// s1.HandleFunc("/article/edit/{userName}/{articleId}", handler.LoadEditArticleTemplate).Methods("GET")
 	return r
 }
 

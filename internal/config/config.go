@@ -13,6 +13,7 @@ type Service struct {
 	Labels                    []string `toml:"Labels"`
 	StartupMsg                string   `toml:"StartupMsg"`
 	DefaultStaticResourcePath string   `toml:"DefaultStaticResourcePath"`
+	JWTKey                    string   `toml:"JWTKey"`
 }
 
 type Database struct {

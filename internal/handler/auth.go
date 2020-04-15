@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"edgex-club/internal/authorization"
+	"edgex-club/internal/config"
 	"edgex-club/internal/model"
 	"edgex-club/internal/repository"
 	"encoding/json"
@@ -35,7 +36,7 @@ func ValidToken(w http.ResponseWriter, r *http.Request) {
 
 	var isVaild string
 	jwtToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return authorization.JWTKey, nil
+		return config.Config.Service.JWTKey, nil
 	})
 
 	//包括超时、被篡改等，都会无效

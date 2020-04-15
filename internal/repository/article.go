@@ -126,6 +126,15 @@ func (as *ArticleRepositoty) FindNewArticles() []model.Article {
 	return articles
 }
 
+func (as *ArticleRepositoty) FindAllArticles() []model.Article {
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	articles := make([]model.Article, 0)
+	col := ds.S.DB("edgex-club").C("article")
+	col.Find(bson.M{"approved": true}).Sort("-created").Limit(50).All(&articles)
+	return articles
+}
+
 func (as *ArticleRepositoty) UpdateOne(id string, a model.Article) {
 	ds := DS.DataStore()
 	defer ds.S.Close()

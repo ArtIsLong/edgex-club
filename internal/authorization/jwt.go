@@ -1,14 +1,13 @@
 package authorization
 
 import (
+	"edgex-club/internal/config"
 	"edgex-club/internal/model"
 	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
-
-var JWTKey = []byte("edgex_club_jwk_key_ni_cai_bu_dao")
 
 type Claims struct {
 	model.Credentials
@@ -24,7 +23,7 @@ func NewToken(creds model.Credentials) (token string, err error) {
 		},
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	token, err = jwtToken.SignedString(JWTKey)
+	token, err = jwtToken.SignedString(config.Config.Service.JWTKey)
 	if err != nil {
 		log.Printf("创建JWT token签名失败：%v", err.Error())
 		return "", err
@@ -35,7 +34,7 @@ func NewToken(creds model.Credentials) (token string, err error) {
 func CheckToken(token string) (ok bool, claims *Claims) {
 	claims = &Claims{}
 	jwtToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return JWTKey, nil
+		return config.Config.Service.JWTKey, nil
 	})
 
 	//包括超时、被篡改等，都会无效
@@ -48,7 +47,7 @@ func CheckToken(token string) (ok bool, claims *Claims) {
 func RefreshToken(tokenStr string) (string, error) {
 	claims := &Claims{}
 	jwtToken, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		return JWTKey, nil
+		return config.Config.Service.JWTKey, nil
 	})
 
 	if err != nil || !jwtToken.Valid {

@@ -92,7 +92,7 @@
 }
 
 .welcome {
-    background-image: url(/img/bg_img.png);
+    background-image: url(/public/img/bg_img.png);
     background-attachment: fixed;
     background-position: 85% 5%;
     background-repeat: no-repeat;

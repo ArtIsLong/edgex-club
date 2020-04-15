@@ -4,6 +4,7 @@ import (
 	"edgex-club/internal/model"
 	repo "edgex-club/internal/repository"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -222,7 +223,7 @@ func FindOneArticle(w http.ResponseWriter, r *http.Request) {
 
 	userName := vars["userName"]
 	articleId := vars["articleId"]
-	// fmt.Printf("userName: %s\n", vars["userName"])
+	fmt.Printf("userName: %s\n", vars["userName"])
 	article := repo.ArticleRepos.FindOne(userName, articleId)
 	user := repo.UserRepos.FindOneByName(userName)
 	articleCount := repo.ArticleRepos.UserArticleCount(userName)
